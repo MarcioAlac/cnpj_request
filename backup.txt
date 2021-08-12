@@ -1,0 +1,67 @@
+import requests
+from bs4 import BeautifulSoup
+from time import sleep as lp
+
+
+class Cnpj_Request:
+    def Request(cnpj_nome):
+        global titulos, informacoes
+        url = requests.get(f'https://www.informecadastral.com.br/cnpj/{cnpj_nome}/')
+        soup = BeautifulSoup(url.content, 'html.parser')
+        titulos = soup.find_all('h3', attrs={'class': 'mb-0'})
+        informacoes = soup.find_all('p', attrs={'class': 'mb-0'})
+        return titulos, informacoes
+
+    cnpj_nome = str(input('Digite o Cnpj: ')).replace('.', '').replace('/', '').replace('-', '')
+    Request(cnpj_nome)
+
+    print('\n!!! Buscando informações no banco de dados !!!\n')
+    lp(2)
+    titulosLista = []
+    lista = []  # resultados dos dados cnpj, APENAS OS RESULTADOS
+    limit = None
+    lenT = len(titulos)
+    lenL = len(informacoes)
+    data = None
+    print(lenL, lenT)
+
+    sim = True
+    while sim == True:
+        if lenT > lenL:
+            for x in range(lenL):
+                titulosLista.append(titulos[x].text)
+                lista.append(informacoes[x+1].text)
+
+            data = dict(zip(titulosLista, lista))
+
+            for x, y in data.items():
+                print(x, y)
+                lp(0.2)
+
+            key = str(input('Outra pesquisa ? [S/N]: '))
+            if key == 's':
+                    cnpj_nome = str(input('Digite o Cnpj: ')).replace('.', '').replace('/', '').replace('-', '')
+                    Request(cnpj_nome)
+            else:
+                break
+        else:
+            for x in range(lenT):
+                titulosLista.append(titulos[x].text)
+                lista.append(informacoes[x+1].text)
+
+            data = dict(zip(titulosLista, lista))
+            for x, y in data.items():
+                print(x, y)
+                lp(0.2)
+
+            print('!!! Lista carregada !!!\n')
+            key = str(input('Outra pesquisa ? [S/N]: '))
+            if key == 's':
+                cnpj_nome = str(input('Digite o Cnpj: ')).replace('.', '').replace('/', '').replace('-', '')
+                Request(cnpj_nome)
+            else:
+                print('\n!!! Volte Sempre !!!')
+                break
+#97.422.620/0001-50
+# 97422620000150
+# 01.472.720/0003-84
